@@ -1,0 +1,14 @@
+{%- assign a = include.article -%}
+<li class="listing-item">
+  <time class="listing-date" datetime="{{ a.date | date_to_xmlschema }}">{{ a.date | date: "%Y-%m-%d" }}</time>
+  <span class="listing-body">
+    <a class="listing-title" href="{{ a.url | relative_url }}">{{ a.title }}</a>
+    {%- if a.draft %} <span class="badge badge-draft">draft</span>{% endif -%}
+    {%- if a.description %}
+      <span class="listing-desc">{{ a.description }}</span>
+    {%- endif -%}
+    {%- if a.tags and a.tags.size > 0 %}
+      {% include tag-list.html tags=a.tags %}
+    {%- endif -%}
+  </span>
+</li>

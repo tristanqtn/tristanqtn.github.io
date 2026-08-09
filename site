@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Local dev entry point. Everything runs in Docker — no Ruby needed on the host.
+#
+#   ./site serve      live-reload dev server on http://localhost:4000
+#   ./site stop       stop a detached dev server
+#   ./site logs       follow the dev server logs
+#   ./site build      production build into _site/ (drafts stripped)
+#   ./site build-dev  development build into _site/ (drafts included)
+#   ./site check      build, then verify every raw file is served byte-identical
+#   ./site install    install/update gems into vendor/bundle
+#   ./site shell      drop into a shell in the build container
+#   ./site clean      remove build output
+set -euo pipefail
+
+cd "$(dirname "$0")"
+
+DOCKER_UID="$(id -u)"; export DOCKER_UID
+DOCKER_GID="$(id -g)"; export DOCKER_GID
+
+dc() { docker compose "$@"; }
+
+check_raw() {
+  local n_raw n_prev
+  n_raw=$(find raw -type f | wc -l)
+
+  # The load-bearing assertion. If this ever fails, something has started
+  # letting Jekyll process raw/ and hosted files are being corrupted.
+  diff -r --no-dereference raw _site/raw
+  echo "OK: ${n_raw} raw files served byte-identical"
+
+  if [ -d _site/files ]; then
+    n_prev=$(find _site/files -name '*.html' ! -name 'index.html' | wc -l)
+    [ "$n_raw" -eq "$n_prev" ] \
+      || { echo "FAIL: ${n_raw} raw files but ${n_prev} preview pages" >&2; exit 1; }
+    echo "OK: every raw file has a preview page"
+  fi
+}
+
+case "${1:-help}" in
+  install)   dc run --rm jekyll bundle install ;;
+  serve)     dc up jekyll ;;
+  stop)      dc down ;;
+  logs)      dc logs -f jekyll ;;
+  build)     dc run --rm -e JEKYLL_ENV=production jekyll bundle exec jekyll build --trace ;;
+  build-dev) dc run --rm jekyll bundle exec jekyll build --trace ;;
+  check)     "$0" build && check_raw ;;
+  shell)     dc run --rm jekyll bash ;;
+  clean)     rm -rf _site .jekyll-cache; echo "cleaned" ;;
+  *)         sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' >&2 ;;
+esac

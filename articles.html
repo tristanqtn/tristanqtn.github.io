@@ -1,0 +1,28 @@
+---
+layout: default
+title: articles
+permalink: /articles/
+description: "Write-ups and notes."
+---
+{% include prompt.html cmd="ls -lt articles/" %}
+
+<h1>articles</h1>
+
+{%- assign sorted = site.articles | sort: 'date' | reverse %}
+{%- if sorted.size == 0 %}
+  <p class="notice">Nothing published yet.</p>
+{%- else %}
+  <p class="dim">
+    {{ sorted.size }} article{% if sorted.size != 1 %}s{% endif %} &middot;
+    <a href="{{ '/tags/' | relative_url }}">browse by tag</a> &middot;
+    <a href="{{ '/feed.xml' | relative_url }}">atom feed</a>
+  </p>
+
+  <hr class="rule">
+
+  <ul class="listing">
+    {%- for a in sorted %}
+      {% include article-item.html article=a %}
+    {%- endfor %}
+  </ul>
+{%- endif %}

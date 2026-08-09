@@ -1,0 +1,146 @@
+/* ==========================================================================
+   Rouge token theme.
+
+   Written by hand rather than generated with `rougify style`, because that
+   emits hard-coded hex which cannot follow a light/dark flip — you end up
+   maintaining two copies that drift. Everything here resolves through the
+   custom properties in main.css, so the light theme comes for free.
+
+   Two shapes are covered:
+     articles  div.highlighter-rouge > div.highlight > pre.highlight > code
+     previews  div.highlighter-rouge > div.highlight > table.rouge-table
+               with td.rouge-gutter > pre.lineno and td.rouge-code > pre
+   ========================================================================== */
+
+/* --- structure ------------------------------------------------------------ */
+code, kbd, samp, pre { font-family: var(--mono); }
+
+/* Inline code, outside any highlight block. */
+:not(pre) > code {
+  background: var(--bg-alt);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.08em 0.35em;
+  font-size: 0.88em;
+  overflow-wrap: anywhere;
+}
+
+.highlighter-rouge {
+  margin: 0 0 1.15rem;
+}
+
+.highlight {
+  background: var(--bg-inset);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  /* The horizontal scroll container. Never wrap code by default: a silently
+     wrapped shell line is dangerous to copy-paste. */
+  overflow-x: auto;
+}
+
+.highlight pre {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  background: none;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  white-space: pre;
+  tab-size: 4;
+}
+
+.highlight code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* --- line-numbered preview tables ----------------------------------------- */
+.rouge-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0;
+}
+.rouge-table td { border: none; padding: 0; vertical-align: top; }
+
+/* Pinned so line numbers stay put while long lines scroll underneath. */
+.rouge-table td.rouge-gutter {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: var(--bg-inset);
+  border-right: 1px solid var(--rule);
+  width: 1%;
+  white-space: nowrap;
+}
+.rouge-table pre.lineno {
+  color: var(--fg-dim);
+  padding: 0.75rem 0.7rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.rouge-table td.rouge-code { width: 100%; }
+
+/* --- tokens --------------------------------------------------------------- */
+.highlight .err { color: var(--err); }
+.highlight .w   { color: inherit; }
+
+/* comments — Dracula's own comment blue, which is deliberately quiet */
+.highlight .c, .highlight .ch, .highlight .cd, .highlight .cm,
+.highlight .cp, .highlight .cpf, .highlight .c1, .highlight .cs {
+  color: var(--comment);
+  font-style: italic;
+}
+
+/* keywords — pink */
+.highlight .k, .highlight .kc, .highlight .kd, .highlight .kn,
+.highlight .kp, .highlight .kr, .highlight .kv {
+  color: var(--kw);
+}
+/* types — cyan italic, as Dracula styles storage types */
+.highlight .kt { color: var(--accent-2); font-style: italic; }
+
+/* strings */
+.highlight .s, .highlight .sa, .highlight .sb, .highlight .sc,
+.highlight .dl, .highlight .sd, .highlight .s2, .highlight .se,
+.highlight .sh, .highlight .si, .highlight .sx, .highlight .sr,
+.highlight .s1, .highlight .ss {
+  color: var(--str);
+}
+
+/* numbers */
+.highlight .m, .highlight .mb, .highlight .mf, .highlight .mh,
+.highlight .mi, .highlight .il, .highlight .mo, .highlight .mx {
+  color: var(--num);
+}
+
+/* names */
+.highlight .n, .highlight .py, .highlight .nl, .highlight .nx { color: var(--fg); }
+.highlight .na { color: var(--fn); }                       /* attributes — green  */
+.highlight .nb, .highlight .bp { color: var(--accent-2); } /* builtins   — cyan   */
+.highlight .nc, .highlight .nn { color: var(--accent-2); } /* classes    — cyan   */
+.highlight .no { color: var(--num); }                      /* constants  — purple */
+.highlight .nd { color: var(--fn); }                       /* decorators — green  */
+.highlight .ni { color: var(--fg); }
+.highlight .ne { color: var(--err); }
+.highlight .nf, .highlight .fm { color: var(--fn); }       /* functions  — green  */
+.highlight .nt { color: var(--kw); }                       /* tags       — pink   */
+/* parameters and variables — orange italic, a Dracula signature */
+.highlight .nv, .highlight .vc, .highlight .vg,
+.highlight .vi, .highlight .vm { color: var(--var); font-style: italic; }
+
+/* operators — pink; punctuation stays foreground so brackets don't disappear */
+.highlight .o, .highlight .ow { color: var(--kw); }
+.highlight .p, .highlight .pi { color: var(--fg); }
+
+/* generic / diff */
+.highlight .gd { color: var(--err); }
+.highlight .gi { color: var(--accent); }
+.highlight .ge { font-style: italic; }
+.highlight .gs { font-weight: 700; }
+.highlight .gh, .highlight .gu { color: var(--fg-bright); font-weight: 700; }
+.highlight .gp { color: var(--fg-dim); }
+.highlight .gr, .highlight .gt { color: var(--err); }
+.highlight .go { color: var(--fg-dim); }

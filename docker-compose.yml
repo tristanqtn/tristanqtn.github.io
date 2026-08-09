@@ -1,0 +1,30 @@
+# Local dev toolchain. Ruby 3.3 to match .github/workflows/pages.yml exactly.
+#
+# Runs as the invoking user (see Makefile, which exports DOCKER_UID/GID) so
+# _site/, vendor/ and Gemfile.lock don't come back owned by root.
+services:
+  jekyll:
+    image: ruby:3.3-bookworm
+    user: "${DOCKER_UID:-1000}:${DOCKER_GID:-1000}"
+    working_dir: /srv/site
+    volumes:
+      - .:/srv/site
+    environment:
+      # Bundle into the project so the non-root user can write it.
+      BUNDLE_PATH: /srv/site/vendor/bundle
+      BUNDLE_BIN: /srv/site/vendor/bin
+      # Bundler needs a writable HOME; the container user has none.
+      HOME: /tmp
+      JEKYLL_ENV: ${JEKYLL_ENV:-development}
+    ports:
+      - "4000:4000"
+      - "35729:35729"
+    # A literal block, not a folded one: YAML's `>` keeps newlines on lines that
+    # are indented further than the first, which silently split the flags off
+    # into their own commands and left Jekyll bound to the container's loopback.
+    command:
+      - bash
+      - -c
+      - |
+        bundle check || bundle install
+        exec bundle exec jekyll serve --host 0.0.0.0 --livereload --force_polling

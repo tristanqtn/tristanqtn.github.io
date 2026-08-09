@@ -1,0 +1,18 @@
+---
+layout: default
+title: "404"
+permalink: /404.html
+sitemap: false
+---
+{% include prompt.html cmd="cat $REQUEST_URI" %}
+
+<h1>404</h1>
+<p class="err-line">cat: no such file or directory</p>
+
+<hr class="rule">
+
+<p>
+  Try <a href="{{ '/articles/' | relative_url }}">articles/</a>,
+  <a href="{{ '/files/' | relative_url }}">files/</a>,
+  or go <a href="{{ '/' | relative_url }}">home</a>.
+</p>

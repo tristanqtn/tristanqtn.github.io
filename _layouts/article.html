@@ -1,0 +1,57 @@
+---
+layout: default
+---
+{%- capture cmd %}cat articles/{{ page.slug }}.md{% endcapture -%}
+{% include prompt.html cmd=cmd %}
+
+<article class="prose">
+  <h1>{{ page.title }}</h1>
+
+  <p class="meta">
+    <time datetime="{{ page.date | date_to_xmlschema }}">{{ page.date | date: "%Y-%m-%d" }}</time>
+    {%- if page.updated %}
+      <span class="p-punct" aria-hidden="true">·</span> updated {{ page.updated | date: "%Y-%m-%d" }}
+    {%- endif -%}
+    {%- if page.draft %}
+      <span class="p-punct" aria-hidden="true">·</span> <span class="badge badge-draft">draft</span>
+    {%- endif -%}
+    {%- if page.tags and page.tags.size > 0 %}
+      <span class="p-punct" aria-hidden="true">·</span> {% include tag-list.html tags=page.tags %}
+    {%- endif -%}
+  </p>
+
+  <hr class="rule">
+
+  {{ content }}
+</article>
+
+{%- assign sorted = site.articles | sort: 'date' | reverse -%}
+{%- assign idx = nil -%}
+{%- for a in sorted -%}
+  {%- if a.url == page.url -%}{%- assign idx = forloop.index0 -%}{%- endif -%}
+{%- endfor -%}
+
+{%- if idx != nil -%}
+  {%- assign prev_i = idx | minus: 1 -%}
+  {%- assign next_i = idx | plus: 1 -%}
+  {%- assign newer = nil -%}
+  {%- assign older = nil -%}
+  {%- if idx > 0 -%}{%- assign newer = sorted[prev_i] -%}{%- endif -%}
+  {%- if next_i < sorted.size -%}{%- assign older = sorted[next_i] -%}{%- endif -%}
+
+  {%- if newer or older %}
+  <hr class="rule">
+  <nav class="pager" aria-label="More articles">
+    {%- if newer %}
+      <a class="pager-link" href="{{ newer.url | relative_url }}">
+        <span class="pager-dir" aria-hidden="true">&larr;</span> {{ newer.title }}
+      </a>
+    {%- else %}<span></span>{% endif -%}
+    {%- if older %}
+      <a class="pager-link pager-older" href="{{ older.url | relative_url }}">
+        {{ older.title }} <span class="pager-dir" aria-hidden="true">&rarr;</span>
+      </a>
+    {%- endif %}
+  </nav>
+  {%- endif -%}
+{%- endif -%}

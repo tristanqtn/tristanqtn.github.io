@@ -1,0 +1,7 @@
+{%- if include.tags and include.tags.size > 0 -%}
+<span class="tags">
+  {%- for t in include.tags -%}
+    <a class="tag" href="{{ t | slugify | prepend: '/tags/' | append: '/' | relative_url }}">#{{ t }}</a>
+  {%- endfor -%}
+</span>
+{%- endif -%}

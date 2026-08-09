@@ -1,0 +1,66 @@
+---
+layout: default
+---
+{%- assign f = page.file -%}
+{%- capture cmd %}cat raw/{{ f.path }}{% endcapture -%}
+{% include prompt.html cmd=cmd %}
+
+<h1 class="file-title">{{ f.path }}</h1>
+
+<dl class="file-meta">
+  <div><dt>size</dt><dd>{{ f.size_human }}</dd></div>
+  <div><dt>lines</dt><dd>{% if f.lines %}{{ f.lines }}{% else %}&mdash;{% endif %}</dd></div>
+  <div><dt>type</dt><dd>{{ f.language }}</dd></div>
+  <div><dt>modified</dt><dd>{{ f.mtime | date: "%Y-%m-%d" }}</dd></div>
+</dl>
+
+<div class="cmdbox">
+  <code id="fetch-cmd" class="cmdbox-code">curl -fsSL {{ f.url | absolute_url }}</code>
+  <button type="button" class="copy-btn" data-copy="#fetch-cmd">copy</button>
+</div>
+
+<p class="file-actions">
+  <a class="btn" href="{{ f.url | relative_url }}">[ view raw ]</a>
+  <a class="btn" href="{{ f.url | relative_url }}" download="{{ f.name }}">[ download ]</a>
+</p>
+
+<details class="sha">
+  <summary>sha256</summary>
+  <div class="cmdbox">
+    <code id="sha-sum" class="cmdbox-code">{{ f.sha256 }}</code>
+    <button type="button" class="copy-btn" data-copy="#sha-sum">copy</button>
+  </div>
+  <p class="dim">
+    Verify against
+    <a href="{{ '/files/SHA256SUMS.txt' | relative_url }}">SHA256SUMS.txt</a>,
+    which is regenerated on every deploy.
+  </p>
+</details>
+
+<hr class="rule">
+
+{% if f.binary %}
+  <p class="notice">
+    Binary file &mdash; nothing sensible to preview.
+    {{ f.size_human }}. Fetch it raw or check the digest above.
+  </p>
+{% elsif f.oversize %}
+  <p class="notice">
+    Too large to preview ({{ f.size_human }}).
+    <a href="{{ f.url | relative_url }}">Fetch it raw</a>.
+  </p>
+{% else %}
+  <div class="src">
+    <input type="checkbox" id="wrap-lines" class="wrap-check">
+    <label class="wrap-toggle" for="wrap-lines">wrap long lines</label>
+
+    {%- if f.truncated %}
+      <p class="notice">
+        Showing the first 500 of {{ f.lines }} lines.
+        <a href="{{ f.url | relative_url }}">Full file</a>.
+      </p>
+    {%- endif %}
+
+    {{ page.highlighted }}
+  </div>
+{% endif %}

@@ -1,0 +1,81 @@
+# ─── site ─────────────────────────────────────────────────────────────────
+title:       tristanqtn
+tagline:     "security · code · ctf"
+description: >-
+  Notes, write-ups, and a pile of scripts and configs served raw over HTTPS.
+author:      Tristan Querton
+email:       tristan.querton@gmail.com
+url:         "https://tristanqtn.github.io"
+baseurl:     ""              # user site — must stay empty
+lang:        en
+timezone:    Europe/Paris
+
+github_username: tristanqtn
+
+social:
+  name: Tristan Querton
+  links:
+    - https://github.com/tristanqtn
+
+# ─── build ────────────────────────────────────────────────────────────────
+markdown:    kramdown
+highlighter: rouge
+permalink:   /articles/:title/     # only affects _posts, which we don't use
+
+kramdown:
+  input: GFM
+  hard_wrap: false
+  auto_ids: true
+  smart_quotes: ["apos", "apos", "quot", "quot"]   # no curly quotes on a mono site
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+    default_lang: text
+
+# ─── collections ──────────────────────────────────────────────────────────
+collections:
+  articles:
+    output: true
+    permalink: /articles/:title/
+    sort_by: date
+
+defaults:
+  - scope:  { path: "", type: "articles" }
+    values:
+      layout: article
+      draft: false
+  - scope:  { path: "" }
+    values:
+      layout: page
+
+# ─── plugins ──────────────────────────────────────────────────────────────
+# The site is built by GitHub Actions, not Pages' safe mode, so this is just a
+# load list — and _plugins/*.rb loads unconditionally alongside it.
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# ─── exclude ──────────────────────────────────────────────────────────────
+# raw/ is deliberately hidden from Jekyll's reader. _plugins/raw_files.rb
+# registers each file as a Jekyll::StaticFile instead, so nothing in there is
+# ever sniffed for front matter or run through Liquid. That is what makes the
+# byte-identity guarantee structural rather than a convention.
+#
+# NOTE: setting `exclude` REPLACES Jekyll's defaults, so they are re-listed.
+exclude:
+  - raw/
+  - README.md
+  - site
+  - docker-compose.yml
+  - Gemfile
+  - Gemfile.lock
+  - gemfiles/
+  - vendor/
+  - .bundle/
+  - .jekyll-cache/
+  - .sass-cache/
+  - node_modules/
+
+keep_files: []
+future: false

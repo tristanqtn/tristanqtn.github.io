@@ -1,0 +1,82 @@
+name: build-and-deploy
+
+# Builds with `bundle exec jekyll build` rather than GitHub's native Pages
+# build, because the latter runs Jekyll in safe mode with _plugins/ disabled —
+# and _plugins/raw_files.rb is what makes raw/ work at all.
+#
+# One-time repo setting this depends on:
+#   Settings -> Pages -> Build and deployment -> Source -> GitHub Actions
+# Without it the deploy step fails no matter what this file says.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  # Let an in-flight deploy finish rather than publishing half of it.
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 3.3 rather than 3.4: 3.4 unbundled csv/base64/bigdecimal from the
+      # default gems, which trips some Jekyll 4.x releases.
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - uses: actions/configure-pages@v5
+
+      - name: Build
+        env:
+          JEKYLL_ENV: production
+        run: bundle exec jekyll build --trace
+
+      # The load-bearing gate. If anyone ever removes `raw/` from the exclude
+      # list in _config.yml, Jekyll starts parsing hosted files and silently
+      # corrupts them — YAML configs lose their leading `---`, Helm charts get
+      # Liquid-rendered. This fails the build instead.
+      - name: Assert raw files are served byte-identical
+        run: |
+          diff -r --no-dereference raw _site/raw
+          echo "OK: $(find raw -type f | wc -l) raw files byte-identical"
+
+      - name: Assert every raw file has a preview page
+        run: |
+          n_raw=$(find raw -type f | wc -l)
+          n_prev=$(find _site/files -name '*.html' ! -name 'index.html' | wc -l)
+          test "$n_raw" -eq "$n_prev" \
+            || { echo "FAIL: $n_raw raw files but $n_prev preview pages"; exit 1; }
+          echo "OK: every raw file has a preview page"
+
+      - name: Assert the feed and sitemap are well-formed
+        run: |
+          python3 -c "import xml.dom.minidom as m; m.parse('_site/feed.xml')"
+          python3 -c "import xml.dom.minidom as m; m.parse('_site/sitemap.xml')"
+          python3 -c "import json; json.load(open('_site/files/manifest.json'))"
+          echo "OK: feed.xml, sitemap.xml and manifest.json parse"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

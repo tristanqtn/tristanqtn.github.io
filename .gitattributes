@@ -1,0 +1,7 @@
+# Raw hosted files are served byte-for-byte over HTTPS and may be piped
+# straight into a shell. Git must never touch their bytes: no EOL
+# normalization on commit or checkout, and no textual diffing.
+raw/** -text -diff
+
+# Everything else gets normal LF normalization.
+* text=auto eol=lf

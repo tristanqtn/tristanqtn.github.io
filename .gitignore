@@ -1,0 +1,11 @@
+_site/
+.jekyll-cache/
+.jekyll-metadata
+.sass-cache/
+vendor/
+.bundle/
+node_modules/
+*.gem
+.DS_Store
+*.swp
+.direnv/

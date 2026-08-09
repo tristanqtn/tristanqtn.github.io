@@ -1,0 +1,42 @@
+---
+layout: default
+title: whoami
+description: "Security engineer. Write-ups, notes, and raw scripts served over HTTPS."
+---
+{% include prompt.html cmd="whoami" %}
+
+<section class="hero">
+  <h1 class="hero-name">{{ site.author }}</h1>
+  <p class="hero-tag">{{ site.tagline }}</p>
+  <p class="hero-blurb">{{ site.description }}</p>
+</section>
+
+<hr class="rule">
+
+{% include prompt.html cmd="ls -t articles/ | head -5" %}
+
+{%- assign recent = site.articles | sort: 'date' | reverse -%}
+{%- if recent.size > 0 %}
+<ul class="listing">
+  {%- for a in recent limit: 5 %}
+    {% include article-item.html article=a %}
+  {%- endfor %}
+</ul>
+<p class="dim"><a href="{{ '/articles/' | relative_url }}">all articles &rarr;</a></p>
+{%- else %}
+<p class="dim">Nothing published yet.</p>
+{%- endif %}
+
+<hr class="rule">
+
+{% include prompt.html cmd="du -sh raw/" %}
+
+{%- assign rf = site.data.raw_files %}
+<p>
+  <strong>{{ rf.count }}</strong> file{% if rf.count != 1 %}s{% endif %}
+  &middot; <strong>{{ rf.total_human }}</strong>
+  &middot; served raw over HTTPS, byte for byte.
+</p>
+<p class="dim">
+  <a href="{{ '/files/' | relative_url }}">browse files &rarr;</a>
+</p>

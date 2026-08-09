@@ -1,0 +1,14 @@
+<header class="term-head">
+  {% include prompt.html cmd="ls" %}
+  <nav class="ls" aria-label="Main navigation">
+    {%- for item in site.data.nav -%}
+      {%- assign here = false -%}
+      {%- if page.url == item.path -%}{%- assign here = true -%}
+      {%- elsif item.path != "/" and page.url contains item.path -%}{%- assign here = true -%}
+      {%- endif -%}
+      <a class="ls-entry{% if item.dir %} is-dir{% endif %}{% if here %} is-here{% endif %}"
+         href="{{ item.path | relative_url }}"
+         {%- if here %} aria-current="page"{% endif %}>{{ item.label }}</a>
+    {%- endfor -%}
+  </nav>
+</header>

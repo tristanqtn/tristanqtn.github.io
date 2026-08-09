@@ -1,0 +1,10 @@
+- label: index.md
+  path: /
+- label: articles/
+  path: /articles/
+  dir: true
+- label: files/
+  path: /files/
+  dir: true
+- label: about.md
+  path: /about/

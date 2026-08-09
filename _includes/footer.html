@@ -1,0 +1,15 @@
+<footer class="term-foot">
+  <hr class="rule">
+  <p class="foot-line">
+    <a href="https://github.com/{{ site.github_username }}">github</a>
+    <span class="p-punct" aria-hidden="true">·</span>
+    <a href="{{ '/feed.xml' | relative_url }}">feed</a>
+    <span class="p-punct" aria-hidden="true">·</span>
+    <a href="{{ '/files/SHA256SUMS.txt' | relative_url }}">sha256sums</a>
+    <span class="p-punct" aria-hidden="true">·</span>
+    {% include theme-toggle.html %}
+  </p>
+  <p class="foot-line dim">
+    <span class="p-sigil">$</span> exit<span class="cursor" aria-hidden="true"></span>
+  </p>
+</footer>

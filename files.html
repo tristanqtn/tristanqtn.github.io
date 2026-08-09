@@ -1,0 +1,60 @@
+---
+layout: default
+title: files
+permalink: /files/
+description: "Scripts, configs and assorted artifacts, served raw over HTTPS."
+---
+{% include prompt.html cmd="ls -R raw/" %}
+
+<h1>files</h1>
+
+{%- assign rf = site.data.raw_files %}
+<p class="dim">
+  {{ rf.count }} file{% if rf.count != 1 %}s{% endif %} &middot; {{ rf.total_human }} &middot;
+  <a href="{{ '/files/SHA256SUMS.txt' | relative_url }}">SHA256SUMS.txt</a> &middot;
+  <a href="{{ '/files/manifest.json' | relative_url }}">manifest.json</a>
+</p>
+
+<p>
+  Everything below is served verbatim from
+  <code>{{ site.url }}/raw/&lt;path&gt;</code> &mdash; no front matter stripped,
+  no templating applied, byte-identical to what is in the repository. Safe to
+  pipe into a shell, if you have read it first.
+</p>
+
+{%- if rf.count == 0 %}
+  <p class="notice">No files hosted yet.</p>
+{%- else %}
+  {%- for group in rf.groups %}
+    <section class="fgroup">
+      <h2 class="fgroup-name">{{ group.label }}</h2>
+      <div class="table-scroll">
+        <table class="ftable">
+          <thead>
+            <tr>
+              <th scope="col">name</th>
+              <th scope="col">size</th>
+              <th scope="col">lines</th>
+              <th scope="col">type</th>
+              <th scope="col"><span class="visually-hidden">raw file</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            {%- for f in group.files %}
+              <tr>
+                <td data-label="name">
+                  <a class="ftable-name" href="{{ f.page_url | relative_url }}">{{ f.name }}</a>
+                  {%- if f.binary %} <span class="badge">bin</span>{% endif -%}
+                </td>
+                <td data-label="size">{{ f.size_human }}</td>
+                <td data-label="lines">{% if f.lines %}{{ f.lines }}{% else %}&mdash;{% endif %}</td>
+                <td data-label="type">{{ f.language }}</td>
+                <td data-label="raw"><a class="rawlink" href="{{ f.url | relative_url }}">raw</a></td>
+              </tr>
+            {%- endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {%- endfor %}
+{%- endif %}

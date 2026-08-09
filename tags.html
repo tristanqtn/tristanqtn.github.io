@@ -1,0 +1,24 @@
+---
+layout: default
+title: tags
+permalink: /tags/
+description: "All article tags."
+---
+{% include prompt.html cmd="ls tags/" %}
+
+<h1>tags</h1>
+
+{%- assign all = site.articles | map: 'tags' | compact | join: ',' | split: ',' | uniq | sort %}
+{%- if all.size == 0 %}
+  <p class="notice">No tags yet.</p>
+{%- else %}
+  <ul class="tag-cloud">
+    {%- for t in all %}
+      {%- assign matches = site.articles | where_exp: "a", "a.tags contains t" %}
+      <li>
+        <a class="tag" href="{{ t | slugify | prepend: '/tags/' | append: '/' | relative_url }}">#{{ t }}</a>
+        <span class="dim">{{ matches.size }}</span>
+      </li>
+    {%- endfor %}
+  </ul>
+{%- endif %}

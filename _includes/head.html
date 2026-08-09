@@ -1,0 +1,19 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<script>
+  // Inline and render-blocking on purpose: this has to run before the first
+  // paint, or a reader with the non-default theme gets a flash of the wrong one.
+  try {
+    var t = localStorage.getItem('theme');
+    if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+  } catch (e) { /* private mode, storage disabled — fall back to system */ }
+</script>
+
+{%- seo -%}
+
+<link rel="stylesheet" href="{{ '/assets/css/main.css' | relative_url }}">
+<link rel="stylesheet" href="{{ '/assets/css/rouge.css' | relative_url }}">
+<link rel="icon" href="{{ '/assets/favicon.svg' | relative_url }}" type="image/svg+xml">
+<link rel="alternate" type="application/atom+xml"
+      title="{{ site.title }}" href="{{ '/feed.xml' | relative_url }}">
