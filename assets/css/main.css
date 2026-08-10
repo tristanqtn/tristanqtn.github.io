@@ -32,7 +32,9 @@
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
           "DejaVu Sans Mono", "Liberation Mono", monospace;
 
-  --measure: 74ch;
+  /* Single content width, shared by text, code blocks, tables and the file
+     index — nothing sticks out past anything else. */
+  --measure: 92ch;
   --gap: 1.15rem;
 
   color-scheme: dark;
@@ -110,7 +112,7 @@ body {
 ::selection { background: var(--sel); }
 
 .wrap {
-  max-width: 94ch;
+  max-width: var(--measure);
   margin: 0 auto;
   padding: 2.5rem 1.25rem 3rem;
 }
@@ -219,7 +221,14 @@ h4 { font-size: 0.95rem; color: var(--fg); }
 .prose h3::before { content: "### "; }
 
 /* --- prose ---------------------------------------------------------------- */
-.prose { max-width: var(--measure); }
+/* One width for everything. Prose fills the wrap, so paragraphs, code blocks
+   and tables all share the same left and right edges. */
+.prose { max-width: 100%; }
+
+/* Long digests and IOC rows still need somewhere to go rather than pushing the
+   page wider than everything else. */
+.prose table { display: block; overflow-x: auto; }
+
 .prose p,
 .prose ul,
 .prose ol,
@@ -262,7 +271,7 @@ h4 { font-size: 0.95rem; color: var(--fg); }
 .prose h2 a, .prose h3 a { color: inherit; }
 
 /* --- hero (home) ---------------------------------------------------------- */
-.hero { max-width: var(--measure); }
+.hero { max-width: 100%; }
 .hero-name { margin: 0 0 0.2rem; font-size: 1.6rem; }
 .hero-tag  { margin: 0 0 1rem; color: var(--accent); }
 .hero-blurb { margin: 0; color: var(--fg); }
@@ -512,7 +521,6 @@ h4 { font-size: 0.95rem; color: var(--fg); }
 @media (max-width: 640px) {
   .wrap { padding: 1.75rem 0.9rem 2.5rem; }
   body { font-size: 0.9rem; }
-  .prose { max-width: 100%; }
   .listing-item { flex-direction: column; gap: 0.15rem; }
   .pager { flex-direction: column; }
   .pager-older { text-align: left; margin-left: 0; }
