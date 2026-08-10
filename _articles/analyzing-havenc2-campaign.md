@@ -1,6 +1,6 @@
 ---
 title: "Analyzing HavenC2 Campaign"
-date: 2026-08-09 12:00:00 +0200
+date: 2026-08-10 12:00:00 +0200
 description: "You thought you found a cracked version of the Adobe Creative Cloud suite and you end up with an infected device. Here is the analysis of a macOS malware infection chain."
 tags: [macos, malware, forensics, reverse]
 draft: false
