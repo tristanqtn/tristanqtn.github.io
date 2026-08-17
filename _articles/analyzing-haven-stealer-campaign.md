@@ -1,5 +1,5 @@
 ---
-title: "Analyzing HavenC2 Campaign"
+title: "Analyzing Haven Stealer Campaign"
 date: 2026-08-10 12:00:00 +0200
 description: "You thought you found a cracked version of the Adobe Creative Cloud suite and you end up with an infected device. Here is the analysis of a macOS malware infection chain."
 tags: [macos, malware, forensics, reverse]
@@ -10,7 +10,7 @@ draft: false
 
 This article follows a complete macOS infection chain, from a single line of shell pasted into a terminal all the way to the compiled payload waiting at the end of it. There are four stages, each with its own flavour of obfuscation, and I have tried to explain not only what each one does but why it was built that way. The last stage is where it gets genuinely interesting: an ad-hoc signed Mach-O that hides every string it uses, ships its own cryptographic stack, and ties its decryption key to the integrity of its own code.
 
-> A note on the name: "HavenC2" is not an established family name, and no vendor calls it that. I made it up from the two domains involved, `haven-10.com` and `haven-vibe.com`, purely so the campaign has something to be called in this article. Please do not read it as an attribution or as a link to any previously documented family.
+> A note on the name: "Haven Stealer" is not an established family name, and no vendor calls it that. I made it up from the two domains involved, `haven-10.com` and `haven-vibe.com`, purely so the campaign has something to be called in this article. Please do not read it as an attribution or as a link to any previously documented family.
 
 > A quick disclaimer: reverse engineering is not my specialty, and part of the work on the stage 3 binary was done with AI support. Everything that could be verified independently, such as the hashes, the self-hash comparison and the key derivation, was verified.
 
