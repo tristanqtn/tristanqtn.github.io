@@ -1,16 +1,14 @@
 ---
-title: "Analyzing Haven Stealer Campaign"
+title: "Analyzing AMOS Stealer Distribution Method"
 date: 2026-08-10 12:00:00 +0200
-description: "You thought you found a cracked version of the Adobe Creative Cloud suite and you end up with an infected device. Here is the analysis of a macOS malware infection chain."
-tags: [macos, malware, forensics, reverse]
+description: "You thought you found a cracked version of the Adobe Creative Cloud suite and you end up with an infected device. Here is the analysis of a macOS malware infection chain that ends in Atomic Stealer (AMOS)."
+tags: [macos, malware, forensics, reverse, infostealer, amos]
 draft: false
 ---
 
 # Introduction
 
 This article follows a complete macOS infection chain, from a single line of shell pasted into a terminal all the way to the compiled payload waiting at the end of it. There are four stages, each with its own flavour of obfuscation, and I have tried to explain not only what each one does but why it was built that way. The last stage is where it gets genuinely interesting: an ad-hoc signed Mach-O that hides every string it uses, ships its own cryptographic stack, and ties its decryption key to the integrity of its own code.
-
-> A note on the name: "Haven Stealer" is not an established family name, and no vendor calls it that. I made it up from the two domains involved, `haven-10.com` and `haven-vibe.com`, purely so the campaign has something to be called in this article. Please do not read it as an attribution or as a link to any previously documented family.
 
 > A quick disclaimer: reverse engineering is not my specialty, and part of the work on the stage 3 binary was done with AI support. Everything that could be verified independently, such as the hashes, the self-hash comparison and the key derivation, was verified.
 
@@ -30,6 +28,7 @@ This delivery pattern has a name: **ClickFix**. The site tells the visitor to co
 - [Stage 1 - Obfuscated zsh loader](#stage-1---obfuscated-zsh-loader)
 - [Stage 2 - Beacon and payload fetch](#stage-2---beacon-and-payload-fetch)
 - [Stage 3 - The Mach-O payload](#stage-3---the-mach-o-payload)
+- [Identifying the payload - Atomic Stealer (AMOS)](#identifying-the-payload---atomic-stealer-amos)
 - [Conclusion](#conclusion)
 - [Indicators of Compromise](#indicators-of-compromise)
 
@@ -402,17 +401,37 @@ Both reports also list contacted IP addresses. I am not publishing them as indic
 
 ---
 
+# Identifying the payload - Atomic Stealer (AMOS)
+
+Everything above this line was written before I had an answer to the question the article ends on. Since then I have gone back through public reporting on macOS infostealers, and I am confident enough to put a name on the family: this is **Atomic macOS Stealer**, better known as **AMOS**.
+
+I want to be precise about what kind of confidence that is. Nothing below comes from the sample itself. I did not get a second, unencrypted build, and I did not capture a live C2 exchange. What follows is a family-level match: every distinctive design choice recovered from Stage 3 has a documented AMOS counterpart, and taken together they are too specific to be coincidence. This is attribution by fingerprint, not by decryption.
+
+AMOS has been sold as malware-as-a-service since April 2023, distributed through Telegram and hacker forums at around $3,000 a month ([SentinelOne](https://www.sentinelone.com/blog/atomic-stealer-threat-actor-spawns-second-variant-of-macos-malware-sold-on-telegram/)), and by 2025 it had become the single largest macOS malware family by volume: Sophos telemetry puts it at roughly 40% of all macOS protection updates that year, and close to half of all stealer-related customer reports since ([Sophos](https://www.sophos.com/en-us/blog/why-amos-matters-the-macos-malware-stealing-data-at-scale)). Every operational detail this article recovered independently lines up with how AMOS is documented to work:
+
+- **The lure.** A fake cracked installer plus a ClickFix Terminal paste is not a generic pattern here, it is AMOS's own signature delivery method. Trend Micro documented a dedicated AMOS campaign built around exactly this pretext, cracked macOS apps used as the hook ([Trend Micro](https://www.trendmicro.com/en_us/research/25/i/an-mdr-analysis-of-the-amos-stealer-campaign.html)).
+- **The anti-VM fingerprint.** The `hw.model`, `machdep.cpu.brand_string` and IOKit registry checks recovered from Stage 3's constant table, searching for `qemu`, `vmware` and `kvm`, are the same fields and the same targets documented for AMOS's sandbox evasion ([Sophos](https://www.sophos.com/en-us/blog/why-amos-matters-the-macos-malware-stealing-data-at-scale)).
+- **The AppleScript core.** AMOS's theft logic is built around AppleScript rather than a native Mach-O routine, including a well known trick where it spoofs the macOS password prompt with a `display dialog` call and a hidden answer field, then hands the captured password back to the stealer process ([Picus Security](https://www.picussecurity.com/resource/blog/atomic-stealer-amos-macos-threat-analysis)). That is a plausible, and frankly more interesting, answer to what the still-empty 194 byte AppleScript in this sample was meant to become.
+- **The C2-gated payload.** Sophos describes AMOS clients registering with the C2 over a `/api/join/`-style endpoint and only then pulling further tasks. That is precisely the shape of the gap this article could not close: a 79 KB block, independently keyed, that the binary cannot decrypt on its own. If the key for that block only exists on the operator's server and is only handed out after check-in, that would explain why sweeping the file for structure turned up nothing.
+- **The per-affiliate build tracking.** The `user` and `BuildID` headers from Stage 2 read naturally as MaaS bookkeeping once you know the model: AMOS is not one operator's private tool, it is a product sold to many affiliates, and each of them gets a distinct build to track their own traffic.
+
+If the rest of the chain matches this closely, then what the 79 KB most likely holds, once unlocked with a key this sample never carries, is AMOS's actual collection routine: Keychain items, saved browser passwords, cookies and autofill data, cryptocurrency wallet extensions, and files pulled from the Desktop, Documents and Notes. I have not verified that this specific build does exactly that. I am confident enough in the family match to say it, and honest enough to flag that the file in front of me still refuses to prove it.
+
+---
+
 # Conclusion
 
 Four stages, and each one hides in a different way: a base64 wrapped URL to get past the human, a decoy heavy shell script to waste the reviewer's time, octal escapes to defeat a grep, and finally a Mach-O that strips out every string, builds its own crypto and ties the decryption key to the integrity of its own code. None of these tricks is exotic on its own. Put together, they are enough to walk out of a sandbox with a clean verdict.
 
-The honest summary is that the chain is mapped all the way to the last door, and that door is still shut. I know how the payload protects itself, how its key is built, and why the remaining data will not come out of the file alone. What it actually does once it lands on a real machine, I still do not know.
+The honest summary is that the chain is mapped all the way to the last door, and that door now has a name on it. I know how the payload protects itself, how its key is built, why the remaining data will not come out of the file alone, and, with reasonable confidence from matching public reporting rather than from decrypting this exact sample, that the family behind it is Atomic Stealer (AMOS). What I still do not have is proof from this specific build: the real AppleScript, the second stage key and the exfiltration routine itself all stayed out of reach.
 
 So if you work on macOS malware and any of this looks familiar, if you have a sample from the same family or a related build, or if you simply spot something I got wrong, I would genuinely like to hear from you. Corrections are as welcome as new material. Reverse engineering is not my field, and this write up will only get better for being picked apart.
 
 ---
 
 # Indicators of Compromise
+
+**Malware family:** Atomic macOS Stealer (AMOS), per the TTP correlation in [Identifying the payload - Atomic Stealer (AMOS)](#identifying-the-payload---atomic-stealer-amos) above. This is a family-level match against public reporting, not a confirmation from decrypting this specific sample's payload.
 
 ## Domains
 
