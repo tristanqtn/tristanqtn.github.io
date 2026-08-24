@@ -1,10 +1,9 @@
 # ─── site ─────────────────────────────────────────────────────────────────
 title:       tristanqtn
-tagline:     "security · code · ctf"
+tagline:     "Break it. Explain it. Secure it."
 description: >-
-  Notes, write-ups, and a pile of scripts and configs served raw over HTTPS.
+  I get paid to break things, then get paid again to explain how I did it.
 author:      Tristan Querton
-email:       tristan.querton@gmail.com
 url:         "https://tristanqtn.github.io"
 baseurl:     ""              # user site — must stay empty
 lang:        en
