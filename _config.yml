@@ -3,7 +3,7 @@ title:       tristanqtn
 tagline:     "Break it. Explain it. Secure it."
 description: >-
   I get paid to break things, then get paid again to explain how I did it.
-author:      Tristan Querton
+author:      Tristan
 url:         "https://tristanqtn.github.io"
 baseurl:     ""              # user site — must stay empty
 lang:        en
@@ -12,7 +12,7 @@ timezone:    Europe/Paris
 github_username: tristanqtn
 
 social:
-  name: Tristan Querton
+  name: Tristan
   links:
     - https://github.com/tristanqtn
 
